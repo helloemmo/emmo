@@ -3,185 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Game: Wiki Race</title>
+    <title>Business Wiki Race: Synchronized</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Arial', sans-serif; background: #111; color: white; overflow: hidden; }
         
         /* Start Screen */
         #start-screen {
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('background.jpg') no-repeat center center fixed;
-            background-size: cover; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('background.jpg');
+            background-size: cover; height: 100vh; display: flex; justify-content: center; align-items: center;
         }
 
-        /* Top Game Bar */
+        /* Top Navigation Bar */
         #game-header {
-            display: none; background: #2c3e50; padding: 10px 20px; border-bottom: 3px solid #f1c40f;
-            grid-template-columns: 1fr 2fr 1fr; align-items: center; position: sticky; top: 0; z-index: 100;
+            display: none; background: #222; height: 70px; border-bottom: 2px solid #f1c40f;
+            display: none; align-items: center; justify-content: space-between; padding: 0 20px;
         }
 
-        .target-box { position: relative; cursor: help; text-align: center; }
-        .target-title { color: #f1c40f; font-weight: bold; font-size: 1.2rem; text-decoration: underline; }
+        .target-box { position: relative; text-align: center; border: 1px solid #444; padding: 5px 15px; border-radius: 8px; cursor: help; }
+        .target-title { color: #f1c40f; font-weight: bold; font-size: 1.1rem; }
         
-        /* Hover Description */
+        /* Tooltip Description */
         .tooltip {
-            visibility: hidden; width: 300px; background-color: #34495e; color: #fff; text-align: left;
-            border-radius: 6px; padding: 15px; position: absolute; z-index: 1; top: 125%; left: 50%;
-            transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; border: 1px solid #f1c40f; font-size: 0.9rem;
+            visibility: hidden; width: 280px; background: #333; color: #fff; border: 1px solid #f1c40f;
+            padding: 10px; position: absolute; top: 110%; left: 50%; transform: translateX(-50%);
+            z-index: 100; border-radius: 5px; font-size: 0.85rem; text-align: left; opacity: 0; transition: 0.3s;
         }
         .target-box:hover .tooltip { visibility: visible; opacity: 1; }
 
-        .stats-bar { display: flex; gap: 20px; font-size: 0.9rem; }
-        
-        /* Game Layout */
-        #iframe-container { width: 100%; height: calc(100vh - 120px); background: white; }
+        /* Stats Display */
+        .stat-item { margin: 0 10px; font-family: monospace; color: #aaa; }
+        .stat-item b { color: #fff; }
+
+        /* Game Area */
+        #iframe-container { width: 100%; height: calc(100vh - 130px); background: white; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        .controls { height: 60px; background: #2c3e50; display: flex; justify-content: center; align-items: center; gap: 10px; }
-        button { padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
-        #win-btn { background: #27ae60; color: white; opacity: 0.5; cursor: not-allowed; }
-        #win-btn.active { opacity: 1; cursor: pointer; box-shadow: 0 0 15px #27ae60; }
+        /* Bottom Controls */
+        .bottom-bar { height: 60px; background: #222; display: flex; justify-content: center; align-items: center; }
+        #win-btn { 
+            padding: 10px 30px; border-radius: 25px; border: none; font-weight: bold;
+            background: #555; color: #888; cursor: not-allowed; transition: 0.3s;
+        }
+        #win-btn.active { background: #27ae60; color: white; cursor: pointer; box-shadow: 0 0 20px rgba(39, 174, 96, 0.5); }
 
-        .setup-ui { display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.8); padding: 30px; border-radius: 15px; }
+        .menu-card { background: rgba(0,0,0,0.9); padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; }
+        input { padding: 10px; width: 200px; border-radius: 5px; border: none; margin: 10px 0; }
     </style>
 </head>
 <body>
 
     <div id="start-screen">
-        <div class="setup-ui">
-            <h1>BUSINESS WIKI RACE</h1>
-            <button onclick="generateMatch()">CREATE NEW MATCH SEED</button>
-            <input type="text" id="seed-input" placeholder="Paste Seed Here">
-            <button id="start-btn" onclick="initGame()" style="background:#f1c40f;">START RACE</button>
+        <div class="menu-card">
+            <h1>BIZ WIKI RACE</h1>
+            <p>Enter Seed ID to Sync with Partner:</p>
+            <input type="number" id="seed-input" placeholder="e.g. 1234">
+            <br>
+            <button onclick="startGame()" style="background:#f1c40f; padding: 10px 40px; font-weight:bold; border-radius:5px; border:none; cursor:pointer;">START MATCH</button>
         </div>
     </div>
 
     <div id="game-header">
-        <div class="stats-bar">
-            <span>⏱️ <b id="timer">0s</b></span>
-            <span>🖱️ <b id="clicks">0</b></span>
-            <span>🔙 <b id="backs">0</b></span>
-        </div>
-        
-        <div class="target-box">
-            TARGET: <span class="target-title" id="target-display">Loading...</span>
-            <div class="tooltip" id="target-desc">Hover to see description of target...</div>
+        <div class="stats">
+            <span class="stat-item">⏱️ <b id="timer">0s</b></span>
+            <span class="stat-item">🖱️ <b id="clicks">0</b></span>
+            <span class="stat-item">🔙 <b id="backs">0</b></span>
         </div>
 
-        <button onclick="location.reload()" style="background:#e74c3c; color:white;">QUIT</button>
+        <div class="target-box">
+            GOAL: <span class="target-title" id="target-display">---</span>
+            <div class="tooltip" id="target-desc">Hover to reveal target details...</div>
+        </div>
+
+        <button onclick="location.reload()" style="background:none; border:1px solid #555; color:white; cursor:pointer; padding:5px 10px; border-radius:4px;">RESTART</button>
     </div>
 
     <div id="iframe-container" style="display:none;">
         <iframe id="wiki-frame" src=""></iframe>
     </div>
 
-    <div id="game-controls" class="controls" style="display:none;">
-        <button id="win-btn" onclick="claimVictory()">🏁 I AM ON THE TARGET PAGE</button>
+    <div id="bottom-bar" class="bottom-bar" style="display:none;">
+        <button id="win-btn" onclick="checkVictory()">🏁 I REACHED THE TARGET</button>
     </div>
 
     <script>
-        let clicks = 0;
-        let backs = 0;
+        let clickCount = 0;
+        let backCount = 0;
         let startTime;
-        let targetPage = "";
-        let startPage = "";
+        let targetTitle = "";
 
-        // Pre-defined Pool for Synchronized Seeds (Business/Tech Focused)
         const articlePool = [
-            {title: "Apple Inc.", desc: "A multinational tech company known for iPhones and Macs."},
-            {title: "Steve Jobs", desc: "Co-founder of Apple and pioneer of the microcomputer revolution."},
-            {title: "Stock market", desc: "The aggregation of buyers and sellers of stocks."},
-            {title: "Elon Musk", desc: "CEO of Tesla and SpaceX."},
-            {title: "Bitcoin", desc: "The first decentralized cryptocurrency."},
-            {title: "Silicon Valley", desc: "A global center for high technology and innovation in California."},
-            {title: "Fortune 500", desc: "An annual list of the 500 largest US corporations."}
+            {t: "Apple Inc.", d: "The company that created the iPhone and Mac."},
+            {t: "Elon Musk", d: "Founder of SpaceX and CEO of Tesla."},
+            {t: "Bitcoin", d: "The world's first decentralized digital currency."},
+            {t: "Silicon Valley", d: "The global hub of technological innovation in California."},
+            {t: "Stock market", d: "The place where shares of public companies are traded."},
+            {t: "Fortune 500", d: "The list of the most successful companies in the USA."},
+            {t: "Artificial intelligence", d: "Intelligence demonstrated by machines, unlike natural intelligence."}
         ];
 
-        function generateMatch() {
-            const seed = Math.floor(Math.random() * 10000);
-            const url = window.location.href.split('?')[0] + "?seed=" + seed;
-            navigator.clipboard.writeText(url);
-            alert("Match Seed Generated & URL Copied! Send this to your friend.");
-            location.href = url;
-        }
+        function startGame() {
+            const seed = parseInt(document.getElementById('seed-input').value);
+            if (!seed) { alert("Please enter a Seed ID first!"); return; }
 
-        function initGame() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const seed = parseInt(urlParams.get('seed')) || 1234;
-            
-            // Use Seed to pick pages (Always the same for the same seed)
+            // Deterministic selection based on Seed
             const startIdx = seed % articlePool.length;
-            const targetIdx = (seed + 3) % articlePool.length;
+            const targetIdx = (seed + 2) % articlePool.length; // Ensure target is different from start
 
-            startPage = articlePool[startIdx].title;
-            targetPage = articlePool[targetIdx].title;
+            const startPage = articlePool[startIdx].t;
+            targetTitle = articlePool[targetIdx].t;
+            const targetDesc = articlePool[targetIdx].d;
 
-            document.getElementById('target-display').innerText = targetPage;
-            document.getElementById('target-desc').innerText = articlePool[targetIdx].desc;
-
+            // UI Update
+            document.getElementById('target-display').innerText = targetTitle;
+            document.getElementById('target-desc').innerText = targetDesc;
             document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('game-header').style.display = 'grid';
+            document.getElementById('game-header').style.display = 'flex';
             document.getElementById('iframe-container').style.display = 'block';
-            document.getElementById('game-controls').style.display = 'flex';
+            document.getElementById('bottom-bar').style.display = 'flex';
 
+            // Load Start Page
             const frame = document.getElementById('wiki-frame');
             frame.src = `https://en.m.wikipedia.org/wiki/${startPage.replace(/ /g, '_')}`;
-            
+
             startTime = Date.now();
-            startTracking();
-        }
-
-        function startTracking() {
-            const frame = document.getElementById('wiki-frame');
             
-            setInterval(() => {
-                const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                document.getElementById('timer').innerText = elapsed + "s";
-                
-                // Security Check: Enable win button only if URL contains target title
-                try {
-                    const currentUrl = frame.contentWindow.location.href;
-                    if (currentUrl.includes(targetPage.replace(/ /g, '_'))) {
-                        document.getElementById('win-btn').classList.add('active');
-                    } else {
-                        document.getElementById('win-btn').classList.remove('active');
-                    }
-                } catch(e) { 
-                    // Cross-origin prevents reading exact URL, so we rely on user clicking "Win" 
-                    // and checking the frame title if possible, or just allowing click.
-                    document.getElementById('win-btn').classList.add('active');
-                }
-            }, 1000);
-
-            // Click Counter Listener
-            frame.onload = function() {
-                clicks++;
-                document.getElementById('clicks').innerText = clicks;
+            // Background Monitor
+            setInterval(updateGameStatus, 1000);
+            
+            // Listen for clicks (frame reloads)
+            frame.onload = () => {
+                clickCount++;
+                document.getElementById('clicks').innerText = clickCount;
             };
         }
 
-        function claimVictory() {
-            if(!document.getElementById('win-btn').classList.contains('active')) {
-                alert("You aren't on the target page yet!");
+        function updateGameStatus() {
+            const now = Date.now();
+            document.getElementById('timer').innerText = Math.floor((now - startTime) / 1000) + "s";
+
+            // Security: Auto-enable button only if the Wikipedia title matches target
+            const frame = document.getElementById('wiki-frame');
+            try {
+                // We check the 'src' which changes as the user clicks links
+                if (frame.src.toLowerCase().includes(targetTitle.replace(/ /g, '_').toLowerCase())) {
+                    document.getElementById('win-btn').classList.add('active');
+                }
+            } catch(e) { 
+                // Fallback for security restrictions: enable button anyway so player can try to claim win
+                document.getElementById('win-btn').classList.add('active');
+            }
+        }
+
+        function checkVictory() {
+            if (!document.getElementById('win-btn').classList.contains('active')) {
+                alert("You aren't at the goal yet! Keep clicking.");
                 return;
             }
-            const timeTaken = document.getElementById('timer').innerText;
-            alert(`🏆 MISSION COMPLETE!\n\nTime: ${timeTaken}\nTotal Clicks: ${clicks}\nBack-button Uses: ${backs}`);
+
+            const totalTime = document.getElementById('timer').innerText;
+            alert(`🏆 VICTORY!\n\nSeed used: ${document.getElementById('seed-input').value}\nTime: ${totalTime}\nClicks: ${clickCount}\nBack-Button Uses: ${backCount}`);
             location.reload();
         }
 
-        // Detect Back Button usage
-        window.addEventListener('popstate', function() {
-            backs++;
-            document.getElementById('backs').innerText = backs;
+        // Detect Browser Back Button
+        window.addEventListener('popstate', () => {
+            backCount++;
+            document.getElementById('backs').innerText = backCount;
         });
-
-        // Check for seed on load
-        window.onload = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('seed')) {
-                document.getElementById('seed-input').value = urlParams.get('seed');
-            }
-        };
     </script>
 </body>
 </html>
