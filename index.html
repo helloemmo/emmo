@@ -3,175 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Business Game</title>
+    <title>Business Game: Wiki Race</title>
     <style>
-        /* --- VISUALS (CSS) --- */
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            font-family: 'Arial Black', sans-serif;
-            overflow-x: hidden;
-            background-color: #222;
-        }
-
-        #start-screen {
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('background.jpg') no-repeat center center fixed;
-            background-size: cover;
-            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;
-            text-align: center;
-        }
-
-        #main-header { font-size: clamp(2rem, 8vw, 4rem); text-shadow: 2px 2px 10px black; margin-bottom: 20px; }
-        .setup-container { display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 10; }
-        input { padding: 12px; border-radius: 8px; border: none; width: 250px; text-align: center; font-size: 1rem; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; overflow: hidden; }
         
-        button { padding: 15px 30px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; text-transform: uppercase; }
-        #play-btn { background: #ff4757; color: white; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4); }
-        #play-btn:disabled { background: #555; cursor: not-allowed; opacity: 0.7; }
-        #share-btn { background: #2ecc71; color: white; margin-top: 5px; }
-
-        .kaleidoscope-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('background.jpg'); background-size: cover;
-            animation: spin 20s linear infinite, hueShift 5s ease-in-out infinite; z-index: -1;
+        /* Start Screen */
+        #start-screen {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('background.jpg') no-repeat center center fixed;
+            background-size: cover; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
         }
-        @keyframes spin { from { transform: rotate(0deg) scale(2); } to { transform: rotate(360deg) scale(2); } }
-        @keyframes hueShift { 50% { filter: hue-rotate(180deg) contrast(1.5); } }
 
-        .waiting-content { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; text-shadow: 2px 2px 5px black; }
-        #game-stats { display: flex; justify-content: space-around; background: #2c3e50; color: white; padding: 15px; align-items: center; }
-        #iframe-container { width: 100%; height: 75vh; background: white; }
+        /* Top Game Bar */
+        #game-header {
+            display: none; background: #2c3e50; padding: 10px 20px; border-bottom: 3px solid #f1c40f;
+            grid-template-columns: 1fr 2fr 1fr; align-items: center; position: sticky; top: 0; z-index: 100;
+        }
+
+        .target-box { position: relative; cursor: help; text-align: center; }
+        .target-title { color: #f1c40f; font-weight: bold; font-size: 1.2rem; text-decoration: underline; }
+        
+        /* Hover Description */
+        .tooltip {
+            visibility: hidden; width: 300px; background-color: #34495e; color: #fff; text-align: left;
+            border-radius: 6px; padding: 15px; position: absolute; z-index: 1; top: 125%; left: 50%;
+            transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; border: 1px solid #f1c40f; font-size: 0.9rem;
+        }
+        .target-box:hover .tooltip { visibility: visible; opacity: 1; }
+
+        .stats-bar { display: flex; gap: 20px; font-size: 0.9rem; }
+        
+        /* Game Layout */
+        #iframe-container { width: 100%; height: calc(100vh - 120px); background: white; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        #leaderboard-container {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.95); color: #f1c40f; padding: 30px; border: 3px solid #f1c40f; z-index: 2000; border-radius: 20px;
-        }
-        .secondary-btn { background: transparent; color: white; border: 1px solid white; margin-top: 10px; }
+        .controls { height: 60px; background: #2c3e50; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        button { padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
+        #win-btn { background: #27ae60; color: white; opacity: 0.5; cursor: not-allowed; }
+        #win-btn.active { opacity: 1; cursor: pointer; box-shadow: 0 0 15px #27ae60; }
+
+        .setup-ui { display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.8); padding: 30px; border-radius: 15px; }
     </style>
 </head>
 <body>
 
     <div id="start-screen">
-        <h1 id="main-header">BUSINESS GAME</h1>
-        <div class="setup-container">
-            <button id="gen-btn" onclick="generateSeed()">GENERATE UNIQUE SEED</button>
-            <div id="seed-display" style="display:none; color: #f1c40f; margin-bottom: 10px; font-weight: bold;"></div>
-            <input type="text" id="seed-input" placeholder="Paste Seed ID here">
-            <div class="button-group">
-                <button id="play-btn" onclick="checkWaitingRoom()" disabled>PLAY NOW</button>
-                <button id="share-btn" onclick="shareSeed()" style="display:none;">SHARE INVITE LINK</button>
-            </div>
-            <button onclick="toggleLeaderboard()" class="secondary-btn">VIEW LEADERBOARD</button>
+        <div class="setup-ui">
+            <h1>BUSINESS WIKI RACE</h1>
+            <button onclick="generateMatch()">CREATE NEW MATCH SEED</button>
+            <input type="text" id="seed-input" placeholder="Paste Seed Here">
+            <button id="start-btn" onclick="initGame()" style="background:#f1c40f;">START RACE</button>
         </div>
     </div>
 
-    <div id="waiting-room" style="display:none;">
-        <div class="kaleidoscope-bg"></div>
-        <div class="waiting-content">
-            <h1>Waiting for your partner...</h1>
-            <p>The race begins once they join via your link.</p>
-            <button onclick="startGame()" style="background:rgba(255,255,255,0.2); color:white; border:1px solid white;">Bypass (Solo Play)</button>
+    <div id="game-header">
+        <div class="stats-bar">
+            <span>⏱️ <b id="timer">0s</b></span>
+            <span>🖱️ <b id="clicks">0</b></span>
+            <span>🔙 <b id="backs">0</b></span>
         </div>
+        
+        <div class="target-box">
+            TARGET: <span class="target-title" id="target-display">Loading...</span>
+            <div class="tooltip" id="target-desc">Hover to see description of target...</div>
+        </div>
+
+        <button onclick="location.reload()" style="background:#e74c3c; color:white;">QUIT</button>
     </div>
 
-    <div id="game-window" style="display: none;">
-        <div id="game-stats">
-            <span id="timer-display">Time: 0s</span>
-            <span id="click-display">Clicks: 0</span>
-            <button onclick="location.reload()" style="padding:5px 10px; border-radius:5px;">🏠 HOME</button>
-        </div>
-        <div id="iframe-container">
-            <iframe id="wiki-frame" src=""></iframe>
-        </div>
-        <div style="text-align:center; padding: 15px; background: #2c3e50;">
-            <button id="win-btn" onclick="checkWin()" style="background:#2ecc71; color:white;">🏁 I REACHED THE TARGET!</button>
-        </div>
+    <div id="iframe-container" style="display:none;">
+        <iframe id="wiki-frame" src=""></iframe>
     </div>
 
-    <div id="leaderboard-container" style="display:none;">
-        <h3>🏆 Hall of Fame</h3>
-        <ul id="leaderboard-list" style="list-style:none; padding:0;"></ul>
-        <button onclick="toggleLeaderboard()">CLOSE</button>
+    <div id="game-controls" class="controls" style="display:none;">
+        <button id="win-btn" onclick="claimVictory()">🏁 I AM ON THE TARGET PAGE</button>
     </div>
 
     <script>
-        /* --- LOGIC (JAVASCRIPT) --- */
-        let currentSeed = "";
-        let clickCount = 0;
+        let clicks = 0;
+        let backs = 0;
         let startTime;
-        let isFirstLoad = true;
+        let targetPage = "";
+        let startPage = "";
 
-        // Note: Password restriction removed for direct access.
+        // Pre-defined Pool for Synchronized Seeds (Business/Tech Focused)
+        const articlePool = [
+            {title: "Apple Inc.", desc: "A multinational tech company known for iPhones and Macs."},
+            {title: "Steve Jobs", desc: "Co-founder of Apple and pioneer of the microcomputer revolution."},
+            {title: "Stock market", desc: "The aggregation of buyers and sellers of stocks."},
+            {title: "Elon Musk", desc: "CEO of Tesla and SpaceX."},
+            {title: "Bitcoin", desc: "The first decentralized cryptocurrency."},
+            {title: "Silicon Valley", desc: "A global center for high technology and innovation in California."},
+            {title: "Fortune 500", desc: "An annual list of the 500 largest US corporations."}
+        ];
 
-        function generateSeed() {
-            const timestamp = Date.now();
-            const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
-            currentSeed = `${randomStr}-${timestamp}`;
-            document.getElementById('seed-display').innerText = `Seed: ${currentSeed}`;
-            document.getElementById('seed-display').style.display = 'block';
-            document.getElementById('seed-input').value = currentSeed;
-            document.getElementById('play-btn').disabled = false;
-            document.getElementById('share-btn').style.display = 'inline-block';
+        function generateMatch() {
+            const seed = Math.floor(Math.random() * 10000);
+            const url = window.location.href.split('?')[0] + "?seed=" + seed;
+            navigator.clipboard.writeText(url);
+            alert("Match Seed Generated & URL Copied! Send this to your friend.");
+            location.href = url;
         }
 
-        async function shareSeed() {
-            const baseUrl = window.location.href.split('?')[0];
-            const inviteUrl = `${baseUrl}?seed=${currentSeed}`;
-            if (navigator.share) {
-                await navigator.share({ title: 'Business Race', url: inviteUrl });
-            } else {
-                navigator.clipboard.writeText(inviteUrl);
-                alert("Invite Link Copied!");
-            }
-        }
+        function initGame() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const seed = parseInt(urlParams.get('seed')) || 1234;
+            
+            // Use Seed to pick pages (Always the same for the same seed)
+            const startIdx = seed % articlePool.length;
+            const targetIdx = (seed + 3) % articlePool.length;
 
-        function checkWaitingRoom() {
+            startPage = articlePool[startIdx].title;
+            targetPage = articlePool[targetIdx].title;
+
+            document.getElementById('target-display').innerText = targetPage;
+            document.getElementById('target-desc').innerText = articlePool[targetIdx].desc;
+
             document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('waiting-room').style.display = 'block';
+            document.getElementById('game-header').style.display = 'grid';
+            document.getElementById('iframe-container').style.display = 'block';
+            document.getElementById('game-controls').style.display = 'flex';
+
+            const frame = document.getElementById('wiki-frame');
+            frame.src = `https://en.m.wikipedia.org/wiki/${startPage.replace(/ /g, '_')}`;
+            
+            startTime = Date.now();
+            startTracking();
         }
 
-        function startGame() {
-            document.getElementById('waiting-room').style.display = 'none';
-            document.getElementById('game-window').style.display = 'block';
+        function startTracking() {
             const frame = document.getElementById('wiki-frame');
-            frame.src = "https://en.wikipedia.org/wiki/Special:Random";
-            frame.onload = () => {
-                if (!isFirstLoad) {
-                    clickCount++;
-                    document.getElementById('click-display').innerText = `Clicks: ${clickCount}`;
-                }
-                isFirstLoad = false;
-            };
-            startTime = Date.now();
+            
             setInterval(() => {
                 const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                document.getElementById('timer-display').innerText = `Time: ${elapsed}s`;
+                document.getElementById('timer').innerText = elapsed + "s";
+                
+                // Security Check: Enable win button only if URL contains target title
+                try {
+                    const currentUrl = frame.contentWindow.location.href;
+                    if (currentUrl.includes(targetPage.replace(/ /g, '_'))) {
+                        document.getElementById('win-btn').classList.add('active');
+                    } else {
+                        document.getElementById('win-btn').classList.remove('active');
+                    }
+                } catch(e) { 
+                    // Cross-origin prevents reading exact URL, so we rely on user clicking "Win" 
+                    // and checking the frame title if possible, or just allowing click.
+                    document.getElementById('win-btn').classList.add('active');
+                }
             }, 1000);
+
+            // Click Counter Listener
+            frame.onload = function() {
+                clicks++;
+                document.getElementById('clicks').innerText = clicks;
+            };
         }
 
-        function checkWin() {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            let s = JSON.parse(localStorage.getItem('biz_scores')) || [];
-            s.push({t: elapsed, c: clickCount, d: new Date().toLocaleDateString()});
-            s.sort((a,b) => a.c - b.c);
-            localStorage.setItem('biz_scores', JSON.stringify(s.slice(0,5)));
-            alert(`FINISHED!\nTime: ${elapsed}s\nClicks: ${clickCount}`);
+        function claimVictory() {
+            if(!document.getElementById('win-btn').classList.contains('active')) {
+                alert("You aren't on the target page yet!");
+                return;
+            }
+            const timeTaken = document.getElementById('timer').innerText;
+            alert(`🏆 MISSION COMPLETE!\n\nTime: ${timeTaken}\nTotal Clicks: ${clicks}\nBack-button Uses: ${backs}`);
             location.reload();
         }
 
-        function toggleLeaderboard() {
-            const container = document.getElementById('leaderboard-container');
-            const list = document.getElementById('leaderboard-list');
-            container.style.display = container.style.display === 'none' ? 'block' : 'none';
-            const s = JSON.parse(localStorage.getItem('biz_scores')) || [];
-            list.innerHTML = s.map(x => `<li style='border-bottom:1px solid #444; padding:5px;'>${x.c} Clicks | ${x.t}s</li>`).join('') || "No scores yet!";
-        }
+        // Detect Back Button usage
+        window.addEventListener('popstate', function() {
+            backs++;
+            document.getElementById('backs').innerText = backs;
+        });
 
+        // Check for seed on load
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('seed')) {
                 document.getElementById('seed-input').value = urlParams.get('seed');
-                document.getElementById('play-btn').disabled = false;
             }
         };
     </script>
