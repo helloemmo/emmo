@@ -1,77 +1,179 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.2">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Business Game</title>
+    <style>
+        /* --- VISUALS (CSS) --- */
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Arial Black', sans-serif;
+            overflow-x: hidden;
+            background-color: #222;
+        }
+
+        #start-screen {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;
+            text-align: center;
+        }
+
+        #main-header { font-size: clamp(2rem, 8vw, 4rem); text-shadow: 2px 2px 10px black; margin-bottom: 20px; }
+        .setup-container { display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 10; }
+        input { padding: 12px; border-radius: 8px; border: none; width: 250px; text-align: center; font-size: 1rem; }
+        
+        button { padding: 15px 30px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; text-transform: uppercase; }
+        #play-btn { background: #ff4757; color: white; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4); }
+        #play-btn:disabled { background: #555; cursor: not-allowed; opacity: 0.7; }
+        #share-btn { background: #2ecc71; color: white; margin-top: 5px; }
+
+        .kaleidoscope-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('background.jpg'); background-size: cover;
+            animation: spin 20s linear infinite, hueShift 5s ease-in-out infinite; z-index: -1;
+        }
+        @keyframes spin { from { transform: rotate(0deg) scale(2); } to { transform: rotate(360deg) scale(2); } }
+        @keyframes hueShift { 50% { filter: hue-rotate(180deg) contrast(1.5); } }
+
+        .waiting-content { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; text-shadow: 2px 2px 5px black; }
+        #game-stats { display: flex; justify-content: space-around; background: #2c3e50; color: white; padding: 15px; align-items: center; }
+        #iframe-container { width: 100%; height: 75vh; background: white; }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        #leaderboard-container {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95); color: #f1c40f; padding: 30px; border: 3px solid #f1c40f; z-index: 2000; border-radius: 20px;
+        }
+        .secondary-btn { background: transparent; color: white; border: 1px solid white; margin-top: 10px; }
+    </style>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;Bollo Game&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;link rel="stylesheet" href="style.css"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="start-screen"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h1 id="main-header"&gt;BOLLO GAME&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="setup-container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button id="gen-btn" onclick="generateSeed()"&gt;GENERATE UNIQUE SEED&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="seed-display" style="display:none; color: #f1c40f; margin-bottom: 10px; font-weight: bold;"&gt;&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;input type="text" id="seed-input" placeholder="Paste Seed ID here"&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="button-group"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button id="play-btn" onclick="checkWaitingRoom()" disabled&gt;PLAY NOW&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button id="share-btn" onclick="shareSeed()" style="display:none;"&gt;SHARE INVITE LINK&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button onclick="toggleLeaderboard()" class="secondary-btn"&gt;VIEW LEADERBOARD&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="waiting-room" style="display:none;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="kaleidoscope-bg"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="waiting-content"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h1&gt;Waiting for your lazy friend...&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;p&gt;The race begins once they join via your link.&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button onclick="startGame()" class="bypass-btn"&gt;Bypass (Solo Play)&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="game-window" style="display: none;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="game-stats"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;span id="timer-display"&gt;Time: 0s&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;span id="click-display"&gt;Clicks: 0&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button id="home-btn" onclick="goHome()"&gt;🏠 HOME&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h2 id="scene-title"&gt;&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="iframe-container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;iframe id="wiki-frame" src=""&gt;&lt;/iframe&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="controls"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button id="win-btn" onclick="checkWin()"&gt;🏁 I REACHED THE TARGET!&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="leaderboard-container" style="display:none;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h3&gt;🏆 Local Hall of Fame&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;ul id="leaderboard-list"&gt;&lt;/ul&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;button onclick="toggleLeaderboard()"&gt;CLOSE&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="game.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+
+    <div id="start-screen">
+        <h1 id="main-header">BUSINESS GAME</h1>
+        <div class="setup-container">
+            <button id="gen-btn" onclick="generateSeed()">GENERATE UNIQUE SEED</button>
+            <div id="seed-display" style="display:none; color: #f1c40f; margin-bottom: 10px; font-weight: bold;"></div>
+            <input type="text" id="seed-input" placeholder="Paste Seed ID here">
+            <div class="button-group">
+                <button id="play-btn" onclick="checkWaitingRoom()" disabled>PLAY NOW</button>
+                <button id="share-btn" onclick="shareSeed()" style="display:none;">SHARE INVITE LINK</button>
+            </div>
+            <button onclick="toggleLeaderboard()" class="secondary-btn">VIEW LEADERBOARD</button>
+        </div>
+    </div>
+
+    <div id="waiting-room" style="display:none;">
+        <div class="kaleidoscope-bg"></div>
+        <div class="waiting-content">
+            <h1>Waiting for your partner...</h1>
+            <p>The race begins once they join via your link.</p>
+            <button onclick="startGame()" style="background:rgba(255,255,255,0.2); color:white; border:1px solid white;">Bypass (Solo Play)</button>
+        </div>
+    </div>
+
+    <div id="game-window" style="display: none;">
+        <div id="game-stats">
+            <span id="timer-display">Time: 0s</span>
+            <span id="click-display">Clicks: 0</span>
+            <button onclick="location.reload()" style="padding:5px 10px; border-radius:5px;">🏠 HOME</button>
+        </div>
+        <div id="iframe-container">
+            <iframe id="wiki-frame" src=""></iframe>
+        </div>
+        <div style="text-align:center; padding: 15px; background: #2c3e50;">
+            <button id="win-btn" onclick="checkWin()" style="background:#2ecc71; color:white;">🏁 I REACHED THE TARGET!</button>
+        </div>
+    </div>
+
+    <div id="leaderboard-container" style="display:none;">
+        <h3>🏆 Hall of Fame</h3>
+        <ul id="leaderboard-list" style="list-style:none; padding:0;"></ul>
+        <button onclick="toggleLeaderboard()">CLOSE</button>
+    </div>
+
+    <script>
+        /* --- LOGIC (JAVASCRIPT) --- */
+        let currentSeed = "";
+        let clickCount = 0;
+        let startTime;
+        let isFirstLoad = true;
+
+        // Note: Password restriction removed for direct access.
+
+        function generateSeed() {
+            const timestamp = Date.now();
+            const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
+            currentSeed = `${randomStr}-${timestamp}`;
+            document.getElementById('seed-display').innerText = `Seed: ${currentSeed}`;
+            document.getElementById('seed-display').style.display = 'block';
+            document.getElementById('seed-input').value = currentSeed;
+            document.getElementById('play-btn').disabled = false;
+            document.getElementById('share-btn').style.display = 'inline-block';
+        }
+
+        async function shareSeed() {
+            const baseUrl = window.location.href.split('?')[0];
+            const inviteUrl = `${baseUrl}?seed=${currentSeed}`;
+            if (navigator.share) {
+                await navigator.share({ title: 'Business Race', url: inviteUrl });
+            } else {
+                navigator.clipboard.writeText(inviteUrl);
+                alert("Invite Link Copied!");
+            }
+        }
+
+        function checkWaitingRoom() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('waiting-room').style.display = 'block';
+        }
+
+        function startGame() {
+            document.getElementById('waiting-room').style.display = 'none';
+            document.getElementById('game-window').style.display = 'block';
+            const frame = document.getElementById('wiki-frame');
+            frame.src = "https://en.wikipedia.org/wiki/Special:Random";
+            frame.onload = () => {
+                if (!isFirstLoad) {
+                    clickCount++;
+                    document.getElementById('click-display').innerText = `Clicks: ${clickCount}`;
+                }
+                isFirstLoad = false;
+            };
+            startTime = Date.now();
+            setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('timer-display').innerText = `Time: ${elapsed}s`;
+            }, 1000);
+        }
+
+        function checkWin() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            let s = JSON.parse(localStorage.getItem('biz_scores')) || [];
+            s.push({t: elapsed, c: clickCount, d: new Date().toLocaleDateString()});
+            s.sort((a,b) => a.c - b.c);
+            localStorage.setItem('biz_scores', JSON.stringify(s.slice(0,5)));
+            alert(`FINISHED!\nTime: ${elapsed}s\nClicks: ${clickCount}`);
+            location.reload();
+        }
+
+        function toggleLeaderboard() {
+            const container = document.getElementById('leaderboard-container');
+            const list = document.getElementById('leaderboard-list');
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
+            const s = JSON.parse(localStorage.getItem('biz_scores')) || [];
+            list.innerHTML = s.map(x => `<li style='border-bottom:1px solid #444; padding:5px;'>${x.c} Clicks | ${x.t}s</li>`).join('') || "No scores yet!";
+        }
+
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('seed')) {
+                document.getElementById('seed-input').value = urlParams.get('seed');
+                document.getElementById('play-btn').disabled = false;
+            }
+        };
+    </script>
 </body>
 </html>

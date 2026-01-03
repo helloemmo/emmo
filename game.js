@@ -1,11 +1,11 @@
 {\rtf1\ansi\ansicpg1252\cocoartf2867
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 AppleColorEmoji;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
 \paperw11900\paperh16840\margl1440\margr1440\vieww30040\viewh15600\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
-\f0\fs24 \cf0 const SECRET_PASSWORD = "BolloFriends2026"; // Change this for your private group\
+\f0\fs24 \cf0 const SECRET_PASSWORD = \'93Adamsdinner\'94; // Change this for your private group\
 let currentSeed = "";\
 let clickCount = 0;\
 let startTime;\
@@ -20,7 +20,9 @@ function checkAccess() \{\
 \
     const userPass = prompt("Please enter your Invitation Code to play Bollo Game:");\
     if (userPass !== SECRET_PASSWORD) \{\
-        document.body.innerHTML = "<div style='color:white;text-align:center;padding:100px;'><h1>\uc0\u55357 \u56594  Access Denied</h1><p>Ask the host for an invite link.</p></div>";\
+        document.body.innerHTML = "<div style='color:white;text-align:center;padding:100px;'><h1>
+\f1 \uc0\u55357 \u56594 
+\f0  Access Denied</h1><p>Ask the host for an invite link.</p></div>";\
         throw new Error("Access Denied");\
     \}\
 \}\
