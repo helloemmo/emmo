@@ -1,0 +1,57 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2867
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww30040\viewh16320\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 body, html \{\
+    margin: 0; padding: 0; height: 100%;\
+    font-family: 'Arial Black', sans-serif;\
+    overflow-x: hidden;\
+    background-color: #222;\
+\}\
+\
+#start-screen \{\
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('background.jpg') no-repeat center center fixed;\
+    background-size: cover;\
+    height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;\
+    text-align: center;\
+\}\
+\
+#main-header \{ font-size: clamp(2rem, 10vw, 4rem); text-shadow: 2px 2px 10px black; \}\
+\
+.setup-container \{ display: flex; flex-direction: column; gap: 15px; align-items: center; \}\
+\
+input \{ padding: 12px; border-radius: 8px; border: none; width: 250px; text-align: center; font-size: 1rem; \}\
+\
+button \{ padding: 15px 30px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; text-transform: uppercase; \}\
+\
+#play-btn \{ background: #ff4757; color: white; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4); \}\
+#play-btn:disabled \{ background: #555; cursor: not-allowed; box-shadow: none; \}\
+\
+#share-btn \{ background: #2ecc71; color: white; \}\
+\
+/* Kaleidoscope Animation */\
+.kaleidoscope-bg \{\
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;\
+    background: url('background.jpg'); background-size: cover;\
+    animation: spin 20s linear infinite, hueShift 5s ease-in-out infinite; z-index: -1;\
+\}\
+\
+@keyframes spin \{ from \{ transform: rotate(0deg) scale(2); \} to \{ transform: rotate(360deg) scale(2); \} \}\
+@keyframes hueShift \{ 50% \{ filter: hue-rotate(180deg) contrast(1.5); \} \}\
+\
+.waiting-content \{ height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; text-shadow: 2px 2px 5px black; \}\
+\
+#game-stats \{ display: flex; justify-content: space-around; background: #2c3e50; color: white; padding: 15px; align-items: center; \}\
+\
+#iframe-container \{ width: 100%; height: 70vh; background: white; \}\
+#wiki-frame \{ width: 100%; height: 100%; border: none; \}\
+\
+#leaderboard-container \{\
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);\
+    background: rgba(0,0,0,0.95); color: #f1c40f; padding: 30px; border: 3px solid #f1c40f; z-index: 2000; border-radius: 20px;\
+\}\
+\
+.secondary-btn \{ background: transparent; color: white; border: 1px solid white; margin-top: 10px; \}}
