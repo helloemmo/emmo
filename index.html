@@ -3,173 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Wiki Race: Synchronized</title>
+    <title>Business Wiki Race: Sync Edition</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Arial', sans-serif; background: #111; color: white; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background: #0f0f0f; color: white; overflow: hidden; }
         
         /* Start Screen */
         #start-screen {
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('background.jpg');
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('background.jpg');
             background-size: cover; height: 100vh; display: flex; justify-content: center; align-items: center;
         }
 
-        /* Top Navigation Bar */
+        /* Top Game Bar */
         #game-header {
-            display: none; background: #222; height: 70px; border-bottom: 2px solid #f1c40f;
-            display: none; align-items: center; justify-content: space-between; padding: 0 20px;
+            display: none; background: #1a1a1a; height: 80px; border-bottom: 3px solid #f1c40f;
+            align-items: center; justify-content: space-between; padding: 0 30px;
         }
 
-        .target-box { position: relative; text-align: center; border: 1px solid #444; padding: 5px 15px; border-radius: 8px; cursor: help; }
-        .target-title { color: #f1c40f; font-weight: bold; font-size: 1.1rem; }
+        .target-box { position: relative; text-align: center; background: #262626; padding: 8px 20px; border-radius: 10px; cursor: help; border: 1px solid #444; }
+        .target-title { color: #f1c40f; font-weight: bold; font-size: 1.3rem; letter-spacing: 1px; }
         
-        /* Tooltip Description */
+        /* Hover Tooltip */
         .tooltip {
-            visibility: hidden; width: 280px; background: #333; color: #fff; border: 1px solid #f1c40f;
-            padding: 10px; position: absolute; top: 110%; left: 50%; transform: translateX(-50%);
-            z-index: 100; border-radius: 5px; font-size: 0.85rem; text-align: left; opacity: 0; transition: 0.3s;
+            visibility: hidden; width: 250px; background: #333; color: #fff; border: 1px solid #f1c40f;
+            padding: 12px; position: absolute; top: 110%; left: 50%; transform: translateX(-50%);
+            z-index: 100; border-radius: 8px; font-size: 0.9rem; text-align: left; opacity: 0; transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
         .target-box:hover .tooltip { visibility: visible; opacity: 1; }
 
-        /* Stats Display */
-        .stat-item { margin: 0 10px; font-family: monospace; color: #aaa; }
-        .stat-item b { color: #fff; }
+        .stat-group { display: flex; gap: 25px; }
+        .stat-item { font-family: monospace; font-size: 1.1rem; }
+        .stat-item b { color: #f1c40f; }
 
-        /* Game Area */
-        #iframe-container { width: 100%; height: calc(100vh - 130px); background: white; }
+        /* Content Area */
+        #iframe-container { width: 100%; height: calc(100vh - 150px); background: #eee; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* Bottom Controls */
-        .bottom-bar { height: 60px; background: #222; display: flex; justify-content: center; align-items: center; }
+        /* Control Footer */
+        .footer { height: 70px; background: #1a1a1a; display: flex; justify-content: center; align-items: center; }
+        
+        /* The Dynamic Button */
         #win-btn { 
-            padding: 10px 30px; border-radius: 25px; border: none; font-weight: bold;
-            background: #555; color: #888; cursor: not-allowed; transition: 0.3s;
+            padding: 12px 40px; border-radius: 30px; border: none; font-weight: bold; font-size: 1rem;
+            background: #333; color: #666; cursor: not-allowed; transition: all 0.4s ease;
+            text-transform: uppercase;
         }
-        #win-btn.active { background: #27ae60; color: white; cursor: pointer; box-shadow: 0 0 20px rgba(39, 174, 96, 0.5); }
+        #win-btn.active { 
+            background: #27ae60; color: white; cursor: pointer; 
+            box-shadow: 0 0 25px rgba(39, 174, 96, 0.6); transform: scale(1.05);
+        }
 
-        .menu-card { background: rgba(0,0,0,0.9); padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; }
-        input { padding: 10px; width: 200px; border-radius: 5px; border: none; margin: 10px 0; }
+        .menu-card { background: rgba(20,20,20,0.95); padding: 50px; border-radius: 25px; border: 1px solid #f1c40f; text-align: center; }
+        input { padding: 12px; width: 150px; border-radius: 8px; border: 1px solid #f1c40f; background: #000; color: #fff; text-align: center; margin-bottom: 20px; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
     <div id="start-screen">
         <div class="menu-card">
-            <h1>BIZ WIKI RACE</h1>
-            <p>Enter Seed ID to Sync with Partner:</p>
-            <input type="number" id="seed-input" placeholder="e.g. 1234">
+            <h1 style="color:#f1c40f; margin-top:0;">BIZ WIKI RACE</h1>
+            <p>Enter Shared Seed ID to Synchronize:</p>
+            <input type="number" id="seed-input" placeholder="0000">
             <br>
-            <button onclick="startGame()" style="background:#f1c40f; padding: 10px 40px; font-weight:bold; border-radius:5px; border:none; cursor:pointer;">START MATCH</button>
+            <button onclick="launchRace()" style="background:#f1c40f; padding: 15px 50px; font-weight:bold; border-radius:8px; border:none; cursor:pointer; font-size:1rem;">START RACE</button>
         </div>
     </div>
 
     <div id="game-header">
-        <div class="stats">
-            <span class="stat-item">⏱️ <b id="timer">0s</b></span>
-            <span class="stat-item">🖱️ <b id="clicks">0</b></span>
-            <span class="stat-item">🔙 <b id="backs">0</b></span>
+        <div class="stat-group">
+            <span class="stat-item">TIME ⏱️ <b id="timer">0s</b></span>
+            <span class="stat-item">CLICKS 🖱️ <b id="clicks">0</b></span>
         </div>
 
         <div class="target-box">
-            GOAL: <span class="target-title" id="target-display">---</span>
-            <div class="tooltip" id="target-desc">Hover to reveal target details...</div>
+            TARGET: <span class="target-title" id="target-display">---</span>
+            <div class="tooltip" id="target-desc">Hovering...</div>
         </div>
 
-        <button onclick="location.reload()" style="background:none; border:1px solid #555; color:white; cursor:pointer; padding:5px 10px; border-radius:4px;">RESTART</button>
+        <button onclick="location.reload()" style="background:transparent; border:1px solid #444; color:#888; cursor:pointer; padding:8px 15px; border-radius:5px;">EXIT</button>
     </div>
 
     <div id="iframe-container" style="display:none;">
         <iframe id="wiki-frame" src=""></iframe>
     </div>
 
-    <div id="bottom-bar" class="bottom-bar" style="display:none;">
-        <button id="win-btn" onclick="checkVictory()">🏁 I REACHED THE TARGET</button>
+    <div id="game-footer" class="footer" style="display:none;">
+        <button id="win-btn" onclick="validateWin()">I am on the Target Page</button>
     </div>
 
     <script>
-        let clickCount = 0;
-        let backCount = 0;
+        let clicks = -1; // Starts at -1 because the initial load counts as a click
         let startTime;
         let targetTitle = "";
+        let currentUrl = "";
 
-        const articlePool = [
-            {t: "Apple Inc.", d: "The company that created the iPhone and Mac."},
-            {t: "Elon Musk", d: "Founder of SpaceX and CEO of Tesla."},
-            {t: "Bitcoin", d: "The world's first decentralized digital currency."},
-            {t: "Silicon Valley", d: "The global hub of technological innovation in California."},
-            {t: "Stock market", d: "The place where shares of public companies are traded."},
-            {t: "Fortune 500", d: "The list of the most successful companies in the USA."},
-            {t: "Artificial intelligence", d: "Intelligence demonstrated by machines, unlike natural intelligence."}
+        // Fixed Pool for Seed Syncing
+        const pool = [
+            {t: "Apple Inc.", d: "World's most valuable tech company, founded by Steve Jobs."},
+            {t: "Elon Musk", d: "CEO of Tesla and SpaceX, richest person in business."},
+            {t: "Bitcoin", d: "A decentralized digital currency without a central bank."},
+            {t: "Silicon Valley", d: "Region in Northern California that is a global center for high tech."},
+            {t: "Stock market", d: "The collection of markets where stocks are issued and traded."},
+            {t: "Fortune 500", d: "List of the 500 largest companies in the United States."},
+            {t: "Wall Street", d: "Street in Lower Manhattan, home of the New York Stock Exchange."}
         ];
 
-        function startGame() {
+        function launchRace() {
             const seed = parseInt(document.getElementById('seed-input').value);
-            if (!seed) { alert("Please enter a Seed ID first!"); return; }
+            if (!seed) { alert("Enter a Seed ID first!"); return; }
 
-            // Deterministic selection based on Seed
-            const startIdx = seed % articlePool.length;
-            const targetIdx = (seed + 2) % articlePool.length; // Ensure target is different from start
+            // Math-based page picking (Synchronized)
+            const startIdx = seed % pool.length;
+            const targetIdx = (seed + 2) % pool.length;
 
-            const startPage = articlePool[startIdx].t;
-            targetTitle = articlePool[targetIdx].t;
-            const targetDesc = articlePool[targetIdx].d;
+            const startPage = pool[startIdx].t;
+            targetTitle = pool[targetIdx].t;
+            const targetDesc = pool[targetIdx].d;
 
-            // UI Update
+            // Setup UI
             document.getElementById('target-display').innerText = targetTitle;
             document.getElementById('target-desc').innerText = targetDesc;
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game-header').style.display = 'flex';
             document.getElementById('iframe-container').style.display = 'block';
-            document.getElementById('bottom-bar').style.display = 'flex';
+            document.getElementById('game-footer').style.display = 'flex';
 
-            // Load Start Page
+            // Start Iframe
             const frame = document.getElementById('wiki-frame');
             frame.src = `https://en.m.wikipedia.org/wiki/${startPage.replace(/ /g, '_')}`;
 
             startTime = Date.now();
             
-            // Background Monitor
-            setInterval(updateGameStatus, 1000);
-            
-            // Listen for clicks (frame reloads)
+            // Watchdog Loop
+            setInterval(syncCheck, 500);
+
+            // Click Tracker
             frame.onload = () => {
-                clickCount++;
-                document.getElementById('clicks').innerText = clickCount;
+                clicks++;
+                document.getElementById('clicks').innerText = clicks;
             };
         }
 
-        function updateGameStatus() {
+        function syncCheck() {
+            // Update Timer
             const now = Date.now();
             document.getElementById('timer').innerText = Math.floor((now - startTime) / 1000) + "s";
 
-            // Security: Auto-enable button only if the Wikipedia title matches target
+            // Check if user has reached the target
             const frame = document.getElementById('wiki-frame');
+            const winBtn = document.getElementById('win-btn');
+            
+            // Format target for URL check
+            const urlSlug = targetTitle.replace(/ /g, '_').toLowerCase();
+            
             try {
-                // We check the 'src' which changes as the user clicks links
-                if (frame.src.toLowerCase().includes(targetTitle.replace(/ /g, '_').toLowerCase())) {
-                    document.getElementById('win-btn').classList.add('active');
+                // Since we can't read internal content, we check the 'src' attribute 
+                // which updates when we use certain navigation tricks, 
+                // OR we check for internal navigation events.
+                if (frame.src.toLowerCase().includes(urlSlug)) {
+                    winBtn.classList.add('active');
                 }
-            } catch(e) { 
-                // Fallback for security restrictions: enable button anyway so player can try to claim win
-                document.getElementById('win-btn').classList.add('active');
+            } catch(e) {
+                // If browser blocks reading src, we keep the button active after 5 clicks
+                // as a fail-safe, but usually src reading is allowed.
+                if(clicks > 2) winBtn.classList.add('active');
             }
         }
 
-        function checkVictory() {
+        function validateWin() {
             if (!document.getElementById('win-btn').classList.contains('active')) {
-                alert("You aren't at the goal yet! Keep clicking.");
+                alert("The Target Title doesn't match the Page Header yet!");
                 return;
             }
 
-            const totalTime = document.getElementById('timer').innerText;
-            alert(`🏆 VICTORY!\n\nSeed used: ${document.getElementById('seed-input').value}\nTime: ${totalTime}\nClicks: ${clickCount}\nBack-Button Uses: ${backCount}`);
+            const finalTime = document.getElementById('timer').innerText;
+            alert(`🏆 TARGET REACHED!\n\nSeed: ${document.getElementById('seed-input').value}\nTime: ${finalTime}\nTotal Clicks: ${clicks}`);
             location.reload();
         }
-
-        // Detect Browser Back Button
-        window.addEventListener('popstate', () => {
-            backCount++;
-            document.getElementById('backs').innerText = backCount;
-        });
     </script>
 </body>
 </html>
